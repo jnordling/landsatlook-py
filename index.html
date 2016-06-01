@@ -1,0 +1,169 @@
+<html>
+<head>
+<title>Extent Chopper</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="http://js.arcgis.com/3.16/esri/css/esri.css">
+
+<style>
+html, body, #map {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+</style>
+
+<script>
+var dojoConfig = { paths: { extras: location.pathname.replace(/\/[^/]+$/, "") + "/extras" }};
+</script>
+
+<script src="http://js.arcgis.com/3.16/"></script>
+<script>
+	var map, tb, editor, sfs, sms;
+	var hashbucket = [];
+	require([ "esri/map", "esri/geometry/Extent", "extras/ExtentEx", "esri/graphic","esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/toolbars/draw","esri/toolbars/edit","esri/geometry/webMercatorUtils","esri/geometry/geometryEngine", "esri/geometry/Point", "esri/symbols/SimpleMarkerSymbol","esri/SpatialReference","esri/dijit/Search", "dojo/on", "dojo/query" ], function(
+			Map, Extent, ExtentEx, Graphic, SimpleFillSymbol, SimpleLineSymbol, Color, Draw, Edit, GeoUtils, geometryEngine, Point, SimpleMarkerSymbol, SpatialReference, Search, on, $) {
+
+		//setSearchExtent - https://developers.arcgis.com/android/api-reference/reference/com/esri/core/tasks/geocode/LocatorFindParameters.html#setSearchExtent(com.esri.core.geometry.Envelope, com.esri.core.geometry.SpatialReference)
+    var initialExtent = new esri.geometry.Extent(
+      {
+        "xmin":3461001.7800615956,
+        "ymin":3494786.1779246037,
+        "xmax":3515768.9108278505,
+        "ymax":3525437.4262669184,
+        "spatialReference":{"wkid":102100}
+    });
+		
+
+		map = new Map("map", {
+			extent: initialExtent,
+			basemap : "hybrid"
+		});
+
+
+
+    var search = new Search({
+    map: map
+    }, "search");
+    search.startup();
+
+		sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+			    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+			    new Color([255,0,0, 1]), 3),new Color([200,200,200,0])
+			  );
+
+        var line = new SimpleLineSymbol();
+        line.setColor(new Color([255, 0, 0, 1]));
+        var marker = new SimpleMarkerSymbol();
+        marker.setStyle(SimpleMarkerSymbol.STYLE_CROSS);
+        marker.setAngle(-360);
+        marker.setColor(new Color([255, 0, 0, 0.99]));
+        marker.setOutline(line);
+        marker.setSize(20);
+
+		map.on("extent-change", function(evt){
+			//createKeyGeometries(evt.extent);
+      drawPoint();
+
+		});
+    map.on("load", function(evt){
+      //createKeyGeometries(evt.extent);
+      map.setExtent(initialExtent);
+      drawPoint();
+    });
+
+    function drawPoint(){
+			map.graphics.clear();
+      var extent  = map.extent;
+      var ymax = extent.ymax;
+      var xmax = extent.xmax;
+      var xmin = extent.xmin;
+      var ymin = extent.ymin;
+
+      // Center Point
+      var cx = ((xmax - xmin)/2) + xmin
+      var cy = ((ymax - ymin)/2) + ymin
+      var y = ymax - (ymax/2);
+      var x = xmax - (xmax/2);
+      var pt = new Point(cx,cy,map.spatialReference)
+      var graphic = new Graphic(pt,marker);
+      map.graphics.add(graphic);
+
+
+      var box = new esri.geometry.Extent(
+        {
+          "xmin":(extent.xmax - extent.xmin)/5 + extent.xmin,
+          "xmax":extent.xmax - ((extent.xmax - extent.xmin)/5),
+          "ymin":(extent.ymax - extent.ymin)/5 + extent.ymin ,
+          "ymax":extent.ymax - ((extent.ymax - extent.ymin)/5),
+          "spatialReference":{"wkid":102100}
+      });
+      var graphic = new Graphic(box, sfs);
+      map.graphics.add(graphic);
+
+      // var lx = ((xmax - xmin)/5) + xmin
+      // var ly = ((ymax - ymin)/5) + ymin
+      // var pt = new Point(lx,ly,map.spatialReference)
+      // var graphic = new Graphic(pt,marker);
+      // map.graphics.add(graphic);
+      // Bonding box
+
+      // var lx = ((xmax - xmin)/5) - xmax
+      // var ly = ((ymax - ymin)/5) - ymin
+      // var pt = new Point(lx,ly,map.spatialReference)
+      // var graphic = new Graphic(pt,marker);
+      // map.graphics.add(graphic);
+    }
+
+
+// // 7TT3XH4T4L9X9BZX
+// 		function createKeyGeometries(extent){
+// 			map.graphics.clear();
+// 			var extentEx = new ExtentEx(extent);
+// 			var extents = extentEx.getQuardrants();
+// 			for (var property in extents) {
+// 			    if (extents.hasOwnProperty(property)) {
+// 			    		var geom = extents[property];
+// 			    		var graphic = new Graphic(geom, sfs);
+// 					map.graphics.add(graphic);
+// 			    }
+// 			}
+//
+// 			//Dice up the top left extent envelope further
+// 			var topLeftExtent = extentEx.getTopLeftQuadrant();
+// 			var extentEx = new ExtentEx(topLeftExtent); //Passing in the top left extent envelope quadrant
+// 			var extents = extentEx.getQuardrants();
+// 			for (var property in extents) {
+// 			    if (extents.hasOwnProperty(property)) {
+// 			    		var geom = extents[property];
+// 			    		var graphic = new Graphic(geom, sfs);
+// 					map.graphics.add(graphic);
+// 			    }
+// 			}
+			// //Dice up the lower right extent envelop further within the topLeftExent (created just before)
+			// var bottomRightExtent = extentEx.getBottomRightQuadrant();
+			// var extentEx = new ExtentEx(bottomRightExtent); //Passing in the top left extent envelope quadrant
+			// var extents = extentEx.getQuardrants();
+			// for (var property in extents) {
+			//     if (extents.hasOwnProperty(property)) {
+			//     		var geom = extents[property];
+			//     		var graphic = new Graphic(geom, sfs);
+			// 		map.graphics.add(graphic);
+			//     }
+			// }
+      // console.log(bottomRightExtent);
+
+		// }
+		});
+</script>
+</head>
+<body>
+
+<div style="position:absolute;right:0px;">
+<div id="search"></div>
+</div>
+	<div id="map">
+  </div>
+
+</body>
+</html>
