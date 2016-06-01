@@ -1,0 +1,148 @@
+<html>
+<head>
+<title>Extent Chopper</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="http://js.arcgis.com/3.16/esri/css/esri.css">
+
+<style>
+html, body, #map {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+#search{
+	z-index:99999999;
+}
+</style>
+
+<script>
+var dojoConfig = { paths: { extras: location.pathname.replace(/\/[^/]+$/, "") + "/extras" }};
+</script>
+
+<script src="http://js.arcgis.com/3.16/"></script>
+<script   src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+<script>
+	var map, tb, editor, sfs, sms;
+	var hashbucket = [];
+	require([ "esri/map", "esri/geometry/Extent", "extras/ExtentEx", "esri/graphic","esri/symbols/SimpleFillSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/toolbars/draw","esri/toolbars/edit","esri/geometry/webMercatorUtils","esri/geometry/geometryEngine", "esri/geometry/Point", "esri/symbols/SimpleMarkerSymbol","esri/SpatialReference","esri/dijit/Search", "dojo/on", ], function(
+			Map, Extent, ExtentEx, Graphic, SimpleFillSymbol, SimpleLineSymbol, Color, Draw, Edit, GeoUtils, geometryEngine, Point, SimpleMarkerSymbol, SpatialReference, Search, on) {
+    var initialExtent = new esri.geometry.Extent(
+      {
+        "xmin":3461001.7800615956,
+        "ymin":3494786.1779246037,
+        "xmax":3515768.9108278505,
+        "ymax":3525437.4262669184,
+        "spatialReference":{"wkid":102100}
+    });
+
+
+		map = new Map("map", {
+			extent: initialExtent,
+			basemap : "hybrid"
+		});
+
+
+
+    var search = new Search({
+    map: map
+    }, "search");
+    search.startup();
+
+		sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+			    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+			    new Color([255,0,0, 1]), 3),new Color([200,200,200,0])
+			  );
+
+        var line = new SimpleLineSymbol();
+        line.setColor(new Color([255, 0, 0, 1]));
+        var marker = new SimpleMarkerSymbol();
+        marker.setStyle(SimpleMarkerSymbol.STYLE_CROSS);
+        marker.setAngle(-360);
+        marker.setColor(new Color([255, 0, 0, 0.99]));
+        marker.setOutline(line);
+        marker.setSize(20);
+
+		map.on("extent-change", function(evt){
+			//createKeyGeometries(evt.extent);
+      drawPoint();
+			if (map.loaded){
+				updateHtmlData();
+			}
+
+
+		});
+    map.on("load", function(evt){
+      map.setExtent(initialExtent);
+      drawPoint();
+			updateHtmlData();
+    });
+
+		function updateHtmlData(){
+			var extent  = map.extent;
+      var ymax = extent.ymax;
+      var xmax = extent.xmax;
+      var xmin = extent.xmin;
+      var ymin = extent.ymin;
+			$('#ymax').text(ymax);
+			$('#xmax').text(xmax);
+			$('#xmin').text(xmin);
+			$('#ymin').text(ymin);
+		}
+
+    function drawPoint(){
+			map.graphics.clear();
+      var extent  = map.extent;
+      var ymax = extent.ymax;
+      var xmax = extent.xmax;
+      var xmin = extent.xmin;
+      var ymin = extent.ymin;
+
+      // Center Point
+      var cx = ((xmax - xmin)/2) + xmin
+      var cy = ((ymax - ymin)/2) + ymin
+      var y = ymax - (ymax/2);
+      var x = xmax - (xmax/2);
+      var pt = new Point(cx,cy,map.spatialReference)
+      var graphic = new Graphic(pt,marker);
+      map.graphics.add(graphic);
+
+
+      var box = new esri.geometry.Extent(
+        {
+          "xmin":(extent.xmax - extent.xmin)/5 + extent.xmin,
+          "xmax":extent.xmax - ((extent.xmax - extent.xmin)/5),
+          "ymin":(extent.ymax - extent.ymin)/5 + extent.ymin ,
+          "ymax":extent.ymax - ((extent.ymax - extent.ymin)/5),
+          "spatialReference":{"wkid":102100}
+      });
+      var graphic = new Graphic(box, sfs);
+      map.graphics.add(graphic);
+    }
+
+		});
+</script>
+</head>
+<body>
+
+<div style="background:white;z-index:99999;position:absolute;right:10px;top:50px;maring:10;padding:10px;">
+	<h2 style="margin-top:0px;">Search</h2>
+	<div id="search"></div>
+	<div>
+		<pre style='color:#000000;background:#ffffff;'><span style='color:#800080; '>{</span>
+    <span style='color:#0000e6; '>"xmax"</span><span style='color:#808030; '>:</span><span id="xmax" style='color:#0000e6; '>"-12762547.271635106"</span><span style='color:#808030; '>,</span>
+    <span style='color:#0000e6; '>"xmin"</span><span style='color:#808030; '>:</span><span id="xmin" style='color:#0000e6; '>"-12868030.370668506"</span><span style='color:#808030; '>,</span>
+    <span style='color:#0000e6; '>"ymax"</span><span style='color:#808030; '>:</span><span id="ymax" style='color:#0000e6; '>"4349313.935638487"</span><span style='color:#808030; '>,</span>
+    <span style='color:#0000e6; '>"ymin"</span><span style='color:#808030; '>:</span><span id="ymin" style='color:#0000e6; '>"4288011.438953858"</span><span style='color:#808030; '>,</span>
+    <span style='color:#0000e6; '>"spatialReference"</span><span style='color:#808030; '>:</span><span style='color:#800080; '>{</span>
+        <span style='color:#0000e6; '>"wkid"</span><span style='color:#808030; '>:</span><span style='color:#0000e6; '>"102100"</span>
+     <span style='color:#800080; '>}</span>
+<span style='color:#800080; '>}</span>
+</pre>
+	</div>
+</div>
+	<div id="map">
+  </div>
+
+</body>
+</html>
