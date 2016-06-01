@@ -2,6 +2,10 @@
 #### A python util to download images from the USGS Image server for a bounding box of interest.
 
 ![alt tag](./vegas.gif)
+
+## Find your extent of interest
+[Web Extent Helper](http://s3.amazonaws.com/geomarvel-projects/extent-helper/extent_helper.html)
+
 ### Install
 > `pip install -r requirements.txt`
 
