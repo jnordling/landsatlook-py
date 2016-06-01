@@ -4,7 +4,7 @@ def main():
 
     landsatlook = LandSatLook({
         "url":"http://landsatlook.usgs.gov/arcgis/rest/services/LandsatLook/ImageServer/",
-        "output_directory":"./test",
+        "output_directory":"./",
         "image_type":"jpg",
         "bounding_box":{
         "geometry":{

@@ -6,6 +6,18 @@
 ## Find your extent of interest
 [Web Extent Helper](http://s3.amazonaws.com/geomarvel-projects/extent-helper/extent_helper.html)
 
+## Download or Clone Code
+> `git clone https://github.com/jnordling/landsatlook-py.git`
+
+or
+Download
+>
+https://github.com/jnordling/landsatlook-py/archive/master.zip
+
+# Take a look at a sample.
+
+#### [Sample](https://github.com/jnordling/landsatlook-py/blob/master/sample.py)
+
 ### Install
 > `pip install -r requirements.txt`
 
